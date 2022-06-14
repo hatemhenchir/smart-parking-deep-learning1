@@ -2,15 +2,25 @@
 # Credit goes to his repo: https://github.com/EdjeElectronics/TensorFlow-Lite-Object-Detection-on-Android-and-Raspberry-Pi
 
 import tflite_runtime.interpreter as tflite
+import RPi.GPIO as GPIO 
 import os
 import argparse
 import cv2
 import numpy as np
 import sys
 import time
+from datetime import datetime
 from threading import Thread
 import importlib.util
-import easyocr
+import pytesseract
+from PIL import  Image
+import firebase_admin
+import  google.cloud
+from firebase_admin import firestore
+from firebase_admin import credentials
+GPIO.setmode(GPIO.BCM) #on définit la numérotation employée pour les broches
+GPIO.setup(17,GPIO.OUT, initial=GPIO.LOW)
+#import easyocr
 #from matplotlib import pyplot as plt
 #import imutils
 # Define VideoStream class to handle streaming of video from webcam in separate processing thread
@@ -110,9 +120,24 @@ print('Running inference for PiCamera')
 # Initialize video stream
 videostream = VideoStream(resolution=(imW,imH),framerate=30).start()
 time.sleep(1)
-reader = easyocr.Reader(['ar'])
+#reader = easyocr.Reader(['ar'])
 #for frame1 in camera.capture_continuous(rawCapture, format="bgr",use_video_port=True):
+#firebase 
+cred = credentials.Certificate("serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+now =datetime.now()
+#result = db.collection("reservation").get()
+#**********************
 while True:
+    result = db.collection("reservation").get()
+    listPlate = []
+    listIdReservation=[]
+    for  i in result:
+        #print(i.to_dict()["plate_number"])
+        listIdReservation.append(i.id)
+        listPlate.append(i.to_dict()["plate_number"])
     # Start timer (for calculating frame rate)
     current_count=0
     t1 = cv2.getTickCount()
@@ -179,8 +204,26 @@ while True:
     frame_rate_calc= 1/time1
     
     try:
-        ocr_result = reader.readtext(ROI,detail=0)
-        print(ocr_result)
+        #ocr_result = reader.readtext(ROI,detail=0)
+        #print(ocr_result)
+        txt=pytesseract.image_to_string(ROI,lang='eng',config="--psm 12 --oem 3 -c tessedit_chart_whitelist=0123456789")
+        text=txt.replace('\n','').replace('\f','')
+        string="&[\)*|$_-;:(=}{]%+/"
+        for  i in  string:
+            text=text.replace(i,'')
+        print(text)
+        if text in listPlate:
+            index=listPlate.index(text)
+            print("exist")
+            GPIO.output (17,GPIO.HIGH)
+            time.sleep(10)
+            GPIO.output (17,GPIO.LOW)
+            enterTime=now.strftime("%d/%m/%Y %H:%M:%S")
+            print(enterTime)
+            db.collection('reservation').document(listIdReservation[index]).update({'valide':'ok','date_entrer':enterTime})
+        else:
+            print("not exist")
+        
     except:
         pass
 
