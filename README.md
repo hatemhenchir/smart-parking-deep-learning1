@@ -1,6 +1,7 @@
 # smart-parking-deep-learning
 
 Step 1. Install the required dependencies onto your Raspberry Pi:
+
 pip3 install opencv-python 
 
 sudo apt-get install libcblas-dev
