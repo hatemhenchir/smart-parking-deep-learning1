@@ -24,3 +24,5 @@ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt-get update
 
 sudo apt-get install python3-tflite-runtime
+
+pip3 install pytesseract
