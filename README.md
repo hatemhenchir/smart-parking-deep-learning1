@@ -42,8 +42,11 @@ sudo apt-get install python3-tflite-runtime
 pip3 install pytesseract
 ```
 2-Clone this repository to your local machine.
+
 3-Install the required Python libraries by running the following command: `pip install -r requirements.txt`
+
 4-Configure the `detect.py` script with your Firebase Firestore database credentials.
+
 5-Connect your camera to the system and run the `detect.py` script.
 
 
