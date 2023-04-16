@@ -4,7 +4,7 @@ This repository contains a Python script for object detection of parked cars at 
 
 ## Files Included
 
-This submodule includes the following files:
+This repository includes the following files:
 
 - `detect.py`: the main Python script that implements the object detection and  the OCR system.
 - `detect.tflite`: the TensorFlow Lite model that was trained for object detection.
